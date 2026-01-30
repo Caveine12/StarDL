@@ -135,52 +135,63 @@ button:hover {
 </div>
 
 <script>
+// Ambil elemen form & progress bar
 const form = document.getElementById("form");
 const bar = document.getElementById("bar");
 
+// Event submit form
 form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  e.preventDefault(); // stop reload page
 
-    bar.style.width = "5%";
+  // Reset progress
+  bar.style.width = "5%";
 
-    const data = new FormData(form);
+  // Ambil data form
+  const data = new FormData(form);
 
-    try {
-        const res = await fetch(
-            "https://circular-brook-informational-manhattan.trycloudflare.com/download",
-            {
-                method: "POST",
-                body: data
-            }
-        );
+  try {
+    // Request ke backend FastAPI via Cloudflare Tunnel
+    const response = await fetch(
+      "https://circular-brook-informational-manhattan.trycloudflare.com/download",
+      {
+        method: "POST",
+        body: data
+      }
+    );
 
-        if (!res.ok) {
-            alert("Gagal download");
-            bar.style.width = "0%";
-            return;
-        }
-
-        bar.style.width = "60%";
-
-        const blob = await res.blob();
-        const url = window.URL.createObjectURL(blob);
-
-        bar.style.width = "90%";
-
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "video.mp4";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-
-        bar.style.width = "100%";
-        setTimeout(() => bar.style.width = "0%", 1500);
-
-    } catch (err) {
-        alert("Error koneksi ke server");
-        bar.style.width = "0%";
+    // Kalau server error
+    if (!response.ok) {
+      alert("Gagal menghubungi server");
+      bar.style.width = "0%";
+      return;
     }
+
+    bar.style.width = "60%";
+
+    // Ambil file hasil download
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+
+    // Trigger download
+    const a = document.createElement("a");
+    a.href = downloadUrl;
+    a.download = "video.mp4";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    // Selesai
+    bar.style.width = "100%";
+    setTimeout(() => {
+      bar.style.width = "0%";
+    }, 1500);
+
+  } catch (error) {
+    // Error koneksi (CORS / server mati / tunnel mati)
+    alert("Error koneksi ke backend");
+    bar.style.width = "0%";
+    console.error(error);
+  }
 });
 </script>
 
