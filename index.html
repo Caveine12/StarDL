@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StarX Downloader</title>
+
+<style>
+:root {
+  --bg: #020617;
+  --card: rgba(15,23,42,.75);
+  --border: rgba(148,163,184,.15);
+  --primary: #38bdf8;
+  --text: #e5e7eb;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+  background: radial-gradient(circle at top, #0f172a, var(--bg));
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 25px;
+  box-shadow: 0 25px 50px rgba(0,0,0,.45);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 8px;
+  font-size: 1.6rem;
+}
+
+p {
+  text-align: center;
+  opacity: .7;
+  margin-bottom: 20px;
+}
+
+input, select, button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 12px;
+  border-radius: 10px;
+  border: none;
+  font-size: 15px;
+}
+
+input, select {
+  background: #020617;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+button {
+  background: linear-gradient(135deg, #38bdf8, #2563eb);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px rgba(56,189,248,.35);
+}
+
+button:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.status {
+  margin-top: 15px;
+  text-align: center;
+  font-size: 14px;
+  min-height: 18px;
+}
+
+.footer {
+  text-align: center;
+  font-size: 12px;
+  opacity: .5;
+  margin-top: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>🚀 StarX Downloader</h1>
+  <p>Fast • Simple • Secure</p>
+
+  <form id="form">
+    <input type="url" id="url" placeholder="Masukkan URL video" required>
+
+    <select id="quality">
+      <option value="best">Best Quality</option>
+      <option value="bestvideo+bestaudio">Best Video</option>
+      <option value="worst">Low Quality</option>
+    </select>
+
+    <button type="submit" id="btn">Download</button>
+  </form>
+
+  <div class="status" id="status"></div>
+
+  <div class="footer">
+    © 2026 StarX-DL
+  </div>
+</div>
+
+<script>
+const BACKEND_URL = "https://starxdl.biz.id/download"; // GANTI INI
+
+const form = document.getElementById("form");
+const statusEl = document.getElementById("status");
+const btn = document.getElementById("btn");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  btn.disabled = true;
+  statusEl.textContent = "⏳ Mengunduh video...";
+
+  const data = new FormData();
+  data.append("url", document.getElementById("url").value);
+  data.append("quality", document.getElementById("quality").value);
+
+  try {
+    const res = await fetch(BACKEND_URL, {
+      method: "POST",
+      body: data
+    });
+
+    if (!res.ok) throw new Error("Backend error");
+
+    const blob = await res.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "video.mp4";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    statusEl.textContent = "✅ Download selesai!";
+  } catch (err) {
+    statusEl.textContent = "❌ Gagal: " + err.message;
+  }
+
+  btn.disabled = false;
+});
+</script>
+
+</body>
+</html>
